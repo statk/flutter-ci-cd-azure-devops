@@ -1,0 +1,85 @@
+trigger:
+- develop
+
+stages:
+- stage: BuildApplication
+  displayName: Build application stage
+  jobs:
+    - job: BuildUnitTests
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - bash: |
+            git clone https://github.com/flutter/flutter.git
+            export PATH=`pwd`/flutter/bin:$PATH
+            flutter channel stable
+            flutter doctor
+            echo "Installed flutter to `pwd`/flutter"
+          displayName: 'Configure flutter SDK'
+        - bash: |
+            set -e
+            export PATH=`pwd`/flutter/bin:$PATH
+            cd dsm_manager_app
+            flutter test
+          displayName: 'Run unit tests'
+
+    - job: BuildiOS
+      pool:
+        vmImage: 'macOs-latest'
+        demands: xcode
+      steps:
+      - bash: |
+            git clone https://github.com/flutter/flutter.git
+            export PATH=`pwd`/flutter/bin:$PATH
+            flutter channel stable
+            flutter doctor
+            echo "Installed flutter to `pwd`/flutter"
+        displayName: 'Configure flutter SDK'
+      - task: InstallAppleProvisioningProfile@1
+        inputs:
+          provisioningProfileLocation: 'secureFiles'
+          provProfileSecureFile: 'Cellenza_Learn_Maelle.mobileprovision'
+        displayName: 'Install provisioning profile'
+      - bash: |
+          export PATH=`pwd`/flutter/bin:$PATH
+          cd dsm_manager_app
+          flutter build ios --release
+        displayName: 'Build iOS'
+      - task: CopyFiles@2
+        displayName: 'Copy artifacts'
+        inputs:
+          SourceFolder: '$(system.defaultworkingdirectory)'
+          Contents: |
+            **/build/**/*.ipa
+            **/build/**/*.apk
+          TargetFolder: '$(build.artifactstagingdirectory)'
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
+
+    # - job: BuildAndroid
+    #   pool:
+    #     vmImage: 'ubuntu-latest'
+    #   steps:
+    #     - bash: |
+    #         git clone https://github.com/flutter/flutter.git
+    #         export PATH=`pwd`/flutter/bin:$PATH
+    #         flutter channel stable
+    #         flutter doctor
+    #         echo "Installed flutter to `pwd`/flutter"
+    #       displayName: 'Configure flutter SDK'
+    #     - bash: |
+    #         export PATH=`pwd`/flutter/bin:$PATH
+    #         cd dsm_manager_app
+    #         flutter build apk --release
+    #       displayName: 'Build Android'
+    #     - task: CopyFiles@2
+    #       displayName: 'Copy artifacts'
+    #       inputs:
+    #         SourceFolder: '$(system.defaultworkingdirectory)'
+    #         Contents: |
+    #           **/build/**/*.apk
+    #         TargetFolder: '$(build.artifactstagingdirectory)'
+            
+    #     - task: PublishBuildArtifacts@1
+    #       displayName: 'Publish Artifact: drop'
