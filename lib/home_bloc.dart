@@ -8,8 +8,8 @@ class HomeBloc {
     _counterInStreamController.stream.listen(_counterInStreamHandler);
   }
 
-  StreamController<IncreaseEvent> _counterInStreamController = StreamController<IncreaseEvent>();
-  Sink<IncreaseEvent> get counterInSink => _counterInStreamController.sink;
+  StreamController<Event> _counterInStreamController = StreamController<Event>();
+  Sink<Event> get counterInSink => _counterInStreamController.sink;
 
   StreamController<int> _counterOutStreamController = StreamController<int>();
   Stream<int> get counterOutStream => _counterOutStreamController.stream;
@@ -23,8 +23,10 @@ class HomeBloc {
     _counterOutStreamController.close();
   }
 
-  void _counterInStreamHandler(IncreaseEvent event) {
-    counter ++;
-    _counterOutStreamController.sink.add(counter);
+  void _counterInStreamHandler(Event event) {
+    if (event is IncreaseEvent) {
+      counter ++;
+      _counterOutStreamController.sink.add(counter);
+    }
   }
 }

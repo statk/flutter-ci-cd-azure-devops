@@ -1,1 +1,2 @@
-class IncreaseEvent{}
+class Event{}
+class IncreaseEvent implements Event{}
