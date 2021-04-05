@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projects/button_widget.dart';
 
 import 'home_page_state.dart';
 
@@ -26,7 +27,8 @@ class MyHomePage extends StatefulWidget {
                   snapShot.data == null ? "0" : snapShot.data.toString(),
                   style: Theme.of(context).textTheme.headline4,
                 );
-              })
+              }),
+          ButtonsocialWidget()
         ],
       )),
       floatingActionButton: FloatingActionButton(
